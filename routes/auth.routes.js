@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const pool = require("../db");
 const crypto = require("crypto");
 const { authLimiter } = require("../middleware/rateLimit");
+const { requireAuth } = require("../middleware/auth");
+
 
 
 
@@ -140,4 +142,45 @@ router.post("/logout", async (req, res, next) => {
     next(err);
   }
 });
+router.put("/password", requireAuth, async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: "oldPassword and newPassword are required" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "newPassword must be at least 8 characters" });
+    }
+
+    const userId = req.user.userId;
+
+    const result = await pool.query(
+      "SELECT password_hash FROM auth_users WHERE id = $1",
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const ok = await bcrypt.compare(oldPassword, result.rows[0].password_hash);
+    if (!ok) {
+      return res.status(401).json({ error: "Old password is incorrect" });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      "UPDATE auth_users SET password_hash = $1 WHERE id = $2",
+      [newHash, userId]
+    );
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
