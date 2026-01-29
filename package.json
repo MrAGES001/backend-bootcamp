@@ -1,0 +1,27 @@
+{
+  "name": "backend-bootcamp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "db:setup": "node db/setup.js",
+    "db:setup:auth": "node db/setup_auth.js",
+    "db:migrate:role": "node db/migrate_add_role.js",
+    "db:make:admin": "node db/make_admin.js",
+    "db:test": "node db/test.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.17.2"
+  }
+}
