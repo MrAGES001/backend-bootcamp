@@ -1,4 +1,6 @@
 const express = require("express");
+const cors = require("cors");
+
 
 const usersRouter = require("./routes/users.routes");
 const authRouter = require("./routes/auth.routes");
@@ -22,6 +24,11 @@ app.use((req, res, next) => {
 app.get("/health", (req, res) => {
   res.json({ message: "Backend is running" });
 });
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // routes
 app.use("/users", usersRouter);
