@@ -10,20 +10,27 @@ const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 
-// ✅ CORS must be BEFORE routes
+/**
+ * ======================
+ * CORS CONFIG (Express 5 SAFE)
+ * ======================
+ * Must be BEFORE routes
+ */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://shiny-peony-cca72d.netlify.app"
+  "https://shiny-peony-cca72d.netlify.app",
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (Postman, curl)
+    origin: (origin, callback) => {
+      // Allow server-to-server, Postman, curl
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
       return callback(new Error("CORS blocked: " + origin));
     },
@@ -32,29 +39,37 @@ app.use(
   })
 );
 
-// ✅ Handle preflight requests
-app.options("*", cors());
+// ✅ Express 5 SAFE preflight handler (DO NOT use "*")
+app.options("/", cors());
 
 app.use(express.json());
 
-// request logger
+/**
+ * Request logger (dev friendly)
+ */
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// health check
+/**
+ * Health check
+ */
 app.get("/health", (req, res) => {
   res.json({ message: "Backend is running" });
 });
 
-// routes
+/**
+ * Routes
+ */
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/me", meRouter);
 app.use("/admin", adminRouter);
 
-// error handlers (must be last)
+/**
+ * Error handlers (must be last)
+ */
 app.use(notFound);
 app.use(errorHandler);
 
